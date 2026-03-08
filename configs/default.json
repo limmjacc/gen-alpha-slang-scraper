@@ -1,0 +1,95 @@
+{
+  "window_hours": 72,
+  "output_dir": "artifacts/latest",
+  "database_path": "artifacts/latest/slang.db",
+  "collectors": {
+    "bluesky_jetstream": {
+      "enabled": true,
+      "duration_seconds": 12,
+      "max_posts": 350,
+      "only_english": true,
+      "endpoint": "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post"
+    },
+    "bluesky_author_feed": {
+      "enabled": true,
+      "limit_per_handle": 20,
+      "handles": [
+        "knowyourmeme.com",
+        "merriam-webster.com"
+      ]
+    },
+    "mastodon_trends": {
+      "enabled": true,
+      "instance_url": "https://mastodon.social",
+      "limit": 20
+    },
+    "mastodon_tag_timeline": {
+      "enabled": true,
+      "instance_url": "https://mastodon.social",
+      "limit_per_tag": 10,
+      "tags": [
+        "ate",
+        "aura",
+        "based",
+        "brainrot",
+        "bussin",
+        "cooked",
+        "delulu",
+        "fanumtax",
+        "glaze",
+        "gyatt",
+        "lowkey",
+        "maincharacter",
+        "mewing",
+        "mid",
+        "mog",
+        "npc",
+        "nocap",
+        "ohio",
+        "ratio",
+        "rizz",
+        "sigma",
+        "skibidi",
+        "slay",
+        "touchgrass",
+        "typebeat",
+        "unc",
+        "valid",
+        "yap",
+        "yapping",
+        "zesty"
+      ]
+    },
+    "x_recent_search": {
+      "enabled": false,
+      "query": "(skibidi OR rizz OR gyatt OR sigma OR delulu OR aura OR brainrot OR mewing OR yapping) lang:en -is:retweet",
+      "limit": 50,
+      "base_url": "https://api.x.com/2"
+    },
+    "facebook_page_feed": {
+      "enabled": false,
+      "graph_version": "v21.0",
+      "page_ids": []
+    },
+    "instagram_hashtags": {
+      "enabled": false,
+      "graph_version": "v21.0",
+      "hashtags": [
+        "rizz",
+        "gyatt",
+        "sigma",
+        "skibidi",
+        "brainrot"
+      ]
+    },
+    "tiktok_research": {
+      "enabled": false,
+      "note": "Implemented as a gated placeholder because the Research API requires approved access."
+    },
+    "snap_public_profiles": {
+      "enabled": false,
+      "note": "Implemented as a gated placeholder because the Public Profile API is allowlist-only."
+    }
+  }
+}
+

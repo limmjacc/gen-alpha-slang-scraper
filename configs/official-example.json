@@ -1,0 +1,25 @@
+{
+  "collectors": {
+    "x_recent_search": {
+      "enabled": true
+    },
+    "facebook_page_feed": {
+      "enabled": true,
+      "page_ids": [
+        "your-page-id"
+      ]
+    },
+    "instagram_hashtags": {
+      "enabled": true,
+      "hashtags": [
+        "rizz",
+        "gyatt",
+        "sigma",
+        "skibidi",
+        "brainrot",
+        "delulu"
+      ]
+    }
+  }
+}
+

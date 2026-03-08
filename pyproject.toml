@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gen-alpha-slang-scraper"
+version = "0.1.0"
+description = "Track emerging slang and internet buzzwords from public social feeds."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "matplotlib>=3.8,<4",
+  "websockets>=12,<16",
+]
+
+[project.scripts]
+slang-scout = "gen_alpha_slang_scraper.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.package-data]
+gen_alpha_slang_scraper = [
+  "data/*.txt",
+]
+
