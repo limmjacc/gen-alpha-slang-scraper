@@ -59,14 +59,13 @@ def run_pipeline(config: dict[str, Any], *, config_path: str | None = None) -> d
     posts = list(deduped_posts.values())
 
     storage.insert_posts(run_id, posts)
-    terms, overview = analyze_posts(posts, window_hours=int(config.get("window_hours", 72)))
-    storage.insert_term_scores(run_id, terms)
+    analysis = analyze_posts(posts, window_hours=int(config.get("window_hours", 72)))
+    storage.insert_term_scores(run_id, analysis.all_terms)
     artifacts = render_dashboard(
         posts=posts,
-        terms=terms,
+        analysis=analysis,
         outcomes=outcomes,
         output_dir=config["output_dir"],
-        overview=overview,
     )
 
     platform_counts = Counter(post.platform for post in posts)
@@ -76,7 +75,9 @@ def run_pipeline(config: dict[str, Any], *, config_path: str | None = None) -> d
         "finished_at": utc_now_iso(),
         "posts_collected": len(posts),
         "platform_counts": dict(platform_counts),
-        "top_terms": [term.term for term in terms[:10]],
+        "most_used_terms": [term.term for term in analysis.most_used_terms[:10]],
+        "emerging_terms": [term.term for term in analysis.emerging_terms[:10]],
+        "overview": analysis.overview,
         "collector_outcomes": [outcome.__dict__ for outcome in outcomes],
         "artifacts": artifacts,
     }

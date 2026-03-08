@@ -5,7 +5,7 @@ import math
 import os
 import re
 from datetime import datetime, timezone
-from html import unescape
+from html import escape, unescape
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
@@ -64,6 +64,10 @@ def strip_html(value: str) -> str:
     parser = TextStripper()
     parser.feed(value)
     return normalize_whitespace(unescape(parser.get_text()))
+
+
+def html_escape(value: str) -> str:
+    return escape(value, quote=True)
 
 
 def normalize_whitespace(value: str) -> str:
@@ -144,6 +148,31 @@ def json_request(
         raise RuntimeError(f"Network error for {full_url}: {exc}") from exc
 
 
+def text_request(
+    url: str,
+    *,
+    headers: dict[str, str] | None = None,
+    params: dict[str, Any] | None = None,
+    timeout: int = 20,
+) -> str:
+    request_headers = {"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"}
+    if headers:
+        request_headers.update(headers)
+    full_url = url
+    if params:
+        query = urlencode({key: value for key, value in params.items() if value is not None}, doseq=True)
+        full_url = f"{url}?{query}"
+    request = Request(full_url, headers=request_headers)
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            return response.read().decode("utf-8", "ignore")
+    except HTTPError as exc:
+        detail = exc.read().decode("utf-8", "ignore")[:400]
+        raise RuntimeError(f"HTTP {exc.code} for {full_url}: {detail}") from exc
+    except URLError as exc:
+        raise RuntimeError(f"Network error for {full_url}: {exc}") from exc
+
+
 def getenv_required(name: str) -> str:
     value = os.getenv(name)
     if not value:
@@ -153,4 +182,3 @@ def getenv_required(name: str) -> str:
 
 def slugify(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
-

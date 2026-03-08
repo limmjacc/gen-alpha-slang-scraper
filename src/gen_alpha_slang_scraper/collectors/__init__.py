@@ -12,6 +12,12 @@ from gen_alpha_slang_scraper.collectors.official import (
     TikTokResearchCollector,
     XRecentSearchCollector,
 )
+from gen_alpha_slang_scraper.collectors.public_web import (
+    FourChanCatalogCollector,
+    LemmyPostsCollector,
+    TumblrTaggedCollector,
+    YouTubeSearchCollector,
+)
 
 
 COLLECTOR_TYPES = {
@@ -19,6 +25,10 @@ COLLECTOR_TYPES = {
     "bluesky_author_feed": BlueskyAuthorFeedCollector,
     "mastodon_tag_timeline": MastodonTagTimelineCollector,
     "mastodon_trends": MastodonTrendsCollector,
+    "youtube_search": YouTubeSearchCollector,
+    "tumblr_tagged": TumblrTaggedCollector,
+    "lemmy_posts": LemmyPostsCollector,
+    "fourchan_catalog": FourChanCatalogCollector,
     "x_recent_search": XRecentSearchCollector,
     "facebook_page_feed": FacebookPageFeedCollector,
     "instagram_hashtags": InstagramHashtagCollector,
@@ -36,4 +46,3 @@ def build_collectors(config: dict[str, Any]) -> list[BaseCollector]:
         if collector_cls:
             collectors.append(collector_cls(collector_config))
     return collectors
-

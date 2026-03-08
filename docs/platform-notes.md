@@ -1,17 +1,31 @@
 # Platform Notes
 
-This project intentionally separates `working now` collectors from `credentialed or approval-gated` collectors.
+This project separates `working now` sources from `official but gated` sources.
 
 ## Working now
 
-These run with the default config and no secrets:
+These run in the default config without secrets:
 
 - `bluesky_jetstream`
 - `bluesky_author_feed`
 - `mastodon_trends`
 - `mastodon_tag_timeline`
+- `youtube_search`
+- `tumblr_tagged`
+- `lemmy_posts`
+- `fourchan_catalog`
 
-They exist to keep the project runnable and to generate real output immediately.
+### What kind of access these use
+
+- `bluesky_jetstream`: public network stream sample
+- `bluesky_author_feed`: public AppView endpoint
+- `mastodon_*`: public instance endpoints
+- `youtube_search`: public search-result HTML scraping
+- `tumblr_tagged`: public tag-page HTML scraping
+- `lemmy_posts`: public JSON API
+- `fourchan_catalog`: public board JSON
+
+These sources exist so the project can produce real output immediately, even when the major closed networks are unavailable.
 
 ## X
 
@@ -23,16 +37,10 @@ Requirements:
 
 - `X_BEARER_TOKEN`
 
-Config fields:
-
-- `query`
-- `limit`
-- `base_url`
-
 Notes:
 
-- This collector uses the recent-search endpoint and expects a valid bearer token.
-- The default query is a compact slang watch query. Replace it with a better operator expression for your use case.
+- This is the cleanest official path for X once credentials are available.
+- Practical access still depends on the current X developer plan and rate limits.
 
 ## Facebook
 
@@ -44,15 +52,10 @@ Requirements:
 
 - `META_ACCESS_TOKEN`
 
-Config fields:
-
-- `page_ids`
-- `graph_version`
-
 Notes:
 
 - This is for Pages, not personal profiles.
-- It is a useful official route for public page posts, but it is not a broad public web search product.
+- It is useful for public Page content, but not a general public web search surface.
 
 ## Instagram
 
@@ -65,15 +68,10 @@ Requirements:
 - `META_ACCESS_TOKEN`
 - `META_IG_USER_ID`
 
-Config fields:
-
-- `hashtags`
-- `graph_version`
-
 Notes:
 
-- This uses the Graph API hashtag lookup flow and then reads recent media for those hashtag IDs.
-- It depends on the app and account having the correct Meta setup.
+- This uses the official Graph API hashtag flow.
+- It depends on Meta app/account setup and the relevant permissions.
 
 ## TikTok
 
@@ -83,8 +81,9 @@ Included as a gated placeholder:
 
 Notes:
 
-- The official Research API is the correct direction for broad public-content analysis, but access is restricted.
-- The placeholder exists so the rest of the project structure is ready once access is approved.
+- The official Research API is the correct path for broad public-content analysis.
+- Access is approval-gated.
+- I also tested public tag-page scraping during development. In this environment the public page loaded, but it did not expose a clean public item list suitable for dependable ingestion, so it is not enabled as a default source.
 
 ## Snapchat
 
@@ -95,15 +94,14 @@ Included as a gated placeholder:
 Notes:
 
 - The Public Profile API is allowlist-only.
-- Add the real API implementation after approval and token provisioning.
+- This is not something to treat as open public scrape territory.
 
-## Why the default run is still useful
+## Why the default run matters
 
-The default configuration is designed to answer a practical need:
+The default configuration is designed around practical delivery:
 
-- collect live social text now
-- score slang now
-- generate a report now
+- collect real public posts now
+- track every extracted term now
+- surface `most used`, `emerging`, and `signal posts` now
 
-Then, when X or Meta credentials are added, the same pipeline and reporting layer can absorb those new feeds with minimal code changes.
-
+Then, when X or Meta credentials are added, the same pipeline and report layer can absorb those new feeds without changing the core analysis model.

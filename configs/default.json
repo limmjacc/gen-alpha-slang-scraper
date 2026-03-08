@@ -60,6 +60,52 @@
         "zesty"
       ]
     },
+    "youtube_search": {
+      "enabled": true,
+      "limit_per_query": 6,
+      "queries": [
+        "skibidi",
+        "rizz",
+        "gyatt",
+        "brainrot",
+        "delulu",
+        "sigma",
+        "bussin",
+        "mewing"
+      ]
+    },
+    "tumblr_tagged": {
+      "enabled": true,
+      "limit_per_tag": 6,
+      "tags": [
+        "skibidi",
+        "rizz",
+        "gyatt",
+        "brainrot",
+        "delulu",
+        "sigma",
+        "bussin",
+        "mewing"
+      ]
+    },
+    "lemmy_posts": {
+      "enabled": true,
+      "instances": [
+        "https://lemmy.world"
+      ],
+      "limit_per_instance": 18,
+      "sort": "Hot",
+      "type_": "All"
+    },
+    "fourchan_catalog": {
+      "enabled": true,
+      "boards": [
+        "v",
+        "co",
+        "tv"
+      ],
+      "limit_per_board": 10
+    },
     "x_recent_search": {
       "enabled": false,
       "query": "(skibidi OR rizz OR gyatt OR sigma OR delulu OR aura OR brainrot OR mewing OR yapping) lang:en -is:retweet",
@@ -92,4 +138,3 @@
     }
   }
 }
-

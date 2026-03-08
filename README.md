@@ -1,13 +1,19 @@
 # gen-alpha-slang-scraper
 
-Track emerging slang, meme vocabulary, and "gen alpha speak" from live public social feeds, score the terms, and render a static dashboard for quick review.
+Track emerging slang, meme vocabulary, and "gen alpha speak" from live public social feeds, keep an inventory of every extracted term, and render a static dashboard that separates `most used now` from `top emerging`.
 
-As shipped on March 8, 2026, the project is fully runnable end to end with public sources that do not require credentials in this environment:
+## Current state
+
+As of March 8, 2026, this repo runs end to end without credentials in this environment using a mix of public APIs and public web scraping:
 
 - Bluesky public Jetstream sample
 - Bluesky public author feeds
 - Mastodon public trend tags
 - Mastodon public tag timelines
+- YouTube public search pages
+- Tumblr public tag pages
+- Lemmy public post API
+- 4chan board catalogs
 
 It also includes optional official collectors for:
 
@@ -20,15 +26,28 @@ And gated placeholders for:
 - `TikTok` Research API
 - `Snapchat` Public Profile API
 
-Those last two remain disabled by default because access is approval-gated or allowlist-only.
+## API access findings
+
+The major social platforms do gate access, but not always in the same way:
+
+- `X`: mainly a paid developer platform problem once you want serious coverage.
+- `Facebook` / `Instagram`: more about app review, scoped permissions, and limited official surfaces than a simple paywall.
+- `TikTok`: official broad research access is approval-gated rather than open public API access.
+- `Snapchat`: public-profile access is allowlist-only.
+
+That is why the default run leans on public, runnable sources instead of pretending the big closed networks are freely scrapable at production quality.
 
 ## What this project does
 
 1. Collects live posts from configured sources.
 2. Stores raw records in SQLite.
-3. Extracts tracked slang terms and nearby candidate vocabulary.
-4. Scores terms using weighted buzz + novelty signals.
-5. Exports CSVs and a static HTML report with charts.
+3. Tracks every extracted normalized term from those posts.
+4. Separates the data into:
+   - `most used now`
+   - `top emerging`
+   - `all tracked terms`
+   - `signal posts`
+5. Exports CSVs and a static HTML dashboard.
 
 ## Quickstart
 
@@ -52,14 +71,9 @@ Run the full pipeline:
 ./.venv/bin/python -m gen_alpha_slang_scraper run --config configs/default.json
 ```
 
-Open the generated report:
+Open the generated dashboard:
 
 - [`artifacts/latest/report.html`](/Users/liamjack/Library/Mobile%20Documents/com~apple~CloudDocs/Projects/Code%20Projects/gen-alpha-slang-scraper/artifacts/latest/report.html)
-- [`artifacts/latest/top_terms.csv`](/Users/liamjack/Library/Mobile%20Documents/com~apple~CloudDocs/Projects/Code%20Projects/gen-alpha-slang-scraper/artifacts/latest/top_terms.csv)
-- [`artifacts/latest/posts.csv`](/Users/liamjack/Library/Mobile%20Documents/com~apple~CloudDocs/Projects/Code%20Projects/gen-alpha-slang-scraper/artifacts/latest/posts.csv)
-- [`artifacts/latest/slang.db`](/Users/liamjack/Library/Mobile%20Documents/com~apple~CloudDocs/Projects/Code%20Projects/gen-alpha-slang-scraper/artifacts/latest/slang.db)
-
-Each run overwrites the files in `artifacts/latest/` and appends a new row set to the SQLite database.
 
 ## CLI
 
@@ -71,41 +85,53 @@ Available commands:
 ./.venv/bin/python -m gen_alpha_slang_scraper run --config configs/default.json
 ```
 
-## Output structure
+## Outputs
 
 `artifacts/latest/` contains:
 
-- `report.html`: static dashboard
-- `top_terms.csv`: ranked slang terms and evidence
-- `posts.csv`: collected posts
+- `report.html`: the dashboard
 - `summary.md`: short run summary
 - `run_metadata.json`: machine-readable run metadata
-- `slang.db`: SQLite database with raw posts and scored terms
-- `top_terms.png`, `platform_mix.png`, `buzz_vs_novelty.png`: charts used in the dashboard
+- `posts.csv`: collected posts
+- `signal_posts.csv`: posts with matched slang terms surfaced explicitly
+- `all_terms.csv`: every extracted normalized term tracked from collected posts
+- `most_used_terms.csv`: top slang terms by current usage score
+- `emerging_terms.csv`: top slang terms by emergence score
+- `top_terms.csv`: compatibility alias for `most_used_terms.csv`
+- `slang.db`: SQLite database with raw posts and tracked term rows
+- `top_terms.png`, `emerging_terms.png`, `platform_mix.png`, `usage_vs_emergence.png`: charts used in the report
 
-## How scoring works
+## How the tracker now works
 
-The score is directional, not absolute.
+The tracker is no longer just a narrow leaderboard.
 
-- `buzz score`: weighted recent mentions, post count, source coverage, and engagement
-- `novelty score`: whether a term matches slang patterns or the built-in watchlist
-- `discovery score`: novelty plus contextual variety
+- Every extracted normalized term is tracked in the inventory.
+- The dashboard has separate views for `most used` and `emerging`.
+- `signal posts` show the exact matched terms for each post, so co-occurring slang does not disappear inside another term's evidence row.
+- `all tracked terms` is searchable in the report and complete in `all_terms.csv`.
 
-Important bias to keep in mind:
+This means if a post contains both `sigma` and `bussin`, the report surfaces both terms and also shows them together inside the post-level evidence card.
 
-- `mastodon_tag_timeline` is a targeted monitoring source. Its hits are downweighted so tracked hashtags do not dominate the report as if they were unbiased platform-wide counts.
-- The default run is a monitoring dashboard, not a complete census of every major social platform.
+## Scoring model
+
+The scores are directional monitoring signals, not language-science ground truth.
+
+- `usage score`: weighted post count, weighted mentions, engagement, and platform spread
+- `emergence score`: novelty, recency, co-occurrence with known slang, and hashtag behavior
+
+Important bias notes:
+
+- Query-driven collectors like `youtube_search`, `tumblr_tagged`, and `mastodon_tag_timeline` are downweighted so they do not dominate as if they were unbiased global samples.
+- Public web scraping sources are useful for monitoring, but they are not the same thing as full official-platform firehose access.
 
 ## Config files
 
-- [`configs/default.json`](/Users/liamjack/Library/Mobile%20Documents/com~apple~CloudDocs/Projects/Code%20Projects/gen-alpha-slang-scraper/configs/default.json): working no-credential configuration
-- [`configs/official-example.json`](/Users/liamjack/Library/Mobile%20Documents/com~apple~CloudDocs/Projects/Code%20Projects/gen-alpha-slang-scraper/configs/official-example.json): example overrides for X and Meta
+- [`configs/default.json`](/Users/liamjack/Library/Mobile%20Documents/com~apple~CloudDocs/Projects/Code%20Projects/gen-alpha-slang-scraper/configs/default.json): runnable default configuration
+- [`configs/official-example.json`](/Users/liamjack/Library/Mobile%20Documents/com~apple~CloudDocs/Projects/Code%20Projects/gen-alpha-slang-scraper/configs/official-example.json): example overrides for official X and Meta sources
 
-## Official sources
+## Official-source env vars
 
-The default config leaves official collectors off because this environment does not contain platform credentials.
-
-Supported env vars:
+When you want to turn on official collectors, these are the current env vars:
 
 - `X_BEARER_TOKEN`
 - `META_ACCESS_TOKEN`
@@ -127,15 +153,14 @@ src/gen_alpha_slang_scraper/
 
 ## Practical limitations
 
-- Without approved access, TikTok and Snapchat cannot be monitored broadly through official APIs.
-- Instagram public access is limited to Graph API surfaces like hashtag search and requires business/professional app setup.
-- X support is straightforward once a bearer token is available, but rate limits and plan limits still matter.
-- Slang detection is heuristic. It is good for monitoring, not final lexicography.
+- The big closed social platforms still require official credentials, review, approval, or allowlisting for serious coverage.
+- Public web scraping can break when page structures change.
+- TikTok and Snapchat are still the hardest platforms to cover cleanly without official access.
+- Slang classification is heuristic. The full inventory is intentionally broader than the curated leaderboard.
 
 ## Next useful extensions
 
-- Persist cross-run history and add real burst-over-baseline scoring.
-- Add OCR and ASR pipelines for short-form video once a legal source path exists.
-- Add a small web UI or API server on top of the SQLite output.
-- Add manual review / approval labels so the slang list can be curated over time.
-
+- Cross-run history so `emerging` becomes true burst-over-baseline detection.
+- Human curation labels for slang candidates.
+- OCR and ASR once a legal video-source path is available.
+- A small local API or web app on top of the SQLite output.
